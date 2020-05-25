@@ -41,7 +41,7 @@ class ConnectorTest < Minitest::Test
 
   # 토큰 요청 테스트
   def test_request_token()
-    m = request_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET)
+    m = Connector.request_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET)
     assert m != nil
     assert '' != m[EasyCodef::KEY_ACCESS_TOKEN] && nil != m[EasyCodef::KEY_ACCESS_TOKEN]
     assert m[EasyCodef::KEY_ACCESS_TOKEN].instance_of? String
@@ -50,7 +50,7 @@ class ConnectorTest < Minitest::Test
   # 토큰 셋팅
   def test_set_token()
     codef = EasyCodef::Codef.new()
-    set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
+    Connector.set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
     
     assert codef.access_token != nil && codef.access_token != ''
   end
@@ -60,13 +60,13 @@ class ConnectorTest < Minitest::Test
     data = create_param_for_create_connected_id().to_json()
 
     access_token = ''
-    res = request_product(EasyCodef::SANDBOX_DOMAIN + '/failPath', access_token, data)
+    res = Connector.request_product(EasyCodef::SANDBOX_DOMAIN + '/failPath', access_token, data)
     assert_equal(Message::NOT_FOUND.code, res['result']['code'])
 
     # 정상 프로세스
     codef = EasyCodef::Codef.new()
-    set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
-    res = request_product(EasyCodef::SANDBOX_DOMAIN + EasyCodef::PATH_CREATE_ACCOUNT, codef.access_token, data)
+    Connector.set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
+    res = Connector.request_product(EasyCodef::SANDBOX_DOMAIN + EasyCodef::PATH_CREATE_ACCOUNT, codef.access_token, data)
 
     assert res != nil
     # result = JSON.parse(res)
@@ -79,7 +79,7 @@ class ConnectorTest < Minitest::Test
 
     body = create_param_for_create_connected_id()
     req_info = codef.get_req_info_by_service_type(EasyCodef::TYPE_SANDBOX)
-    res = execute(EasyCodef::PATH_CREATE_ACCOUNT, body, codef, req_info)
+    res = Connector.execute(EasyCodef::PATH_CREATE_ACCOUNT, body, codef, req_info)
     assert res != nil
     assert res['data']['connectedId'] != nil
   end

@@ -46,12 +46,83 @@ class EasyCodefTest < Minitest::Test
     assert flag == true
   end
 
+  # 2way 키워드 체크 테스트
+  def test_check_two_way_keyword()
+    param = {}
+    flag = check_two_way_keyword(param)
+    assert flag == true
+
+    param['is2Way'] = true
+    flag = check_two_way_keyword(param)
+    assert flag == false
+
+    param['twoWayInfo'] = {}
+    flag = check_two_way_keyword(param)
+    assert flag == false
+  end
+
+  # 2Way 필수 데이터 체크 테스트
+  def test_check_two_way_info()
+    # is2Way 실패 케이스
+    param = {}
+    flag = check_two_way_info(param)
+    assert flag == false
+
+    param = { 'is2Way'=>'hi' }
+    flag = check_two_way_info(param)
+    assert flag == false
+
+    param = { 'is2Way'=>false }
+    flag = check_two_way_info(param)
+    assert flag == false
+
+    # twoWayInfo 실패케이스
+    param = {
+      'is2Way'=>true,
+      'twoWayInfo'=>nil
+    }
+    flag = check_two_way_info(param)
+    assert flag == false
+
+    # 성공 케이스
+    param['twoWayInfo'] = {
+      'jobIndex'=>'1',
+      'threadIndex'=>'1',
+      'jti'=>'1',
+      'twoWayTimestamp'=>'1'
+    }
+    flag = check_two_way_info(param)
+    assert flag == true
+
+  end
+
+  # twoWayInfo 내부검사 테스트
+  def test_check_need_value_in_two_way_info()
+    two_way_info = {
+      'jobIndex'=>'1'
+    }
+    flag = check_need_value_in_two_way_info(two_way_info)
+    assert flag == false
+
+    two_way_info['threadIndex'] = '1'
+    flag = check_need_value_in_two_way_info(two_way_info)
+    assert flag == false
+
+    two_way_info['jti'] = '1'
+    flag = check_need_value_in_two_way_info(two_way_info)
+    assert flag == false
+
+    two_way_info['twoWayTimestamp'] = '1'
+    flag = check_need_value_in_two_way_info(two_way_info)
+    assert flag == true
+  end
+
   # request_product 테스트
-  def test_request_api()
+  def test_request_product()
     # 클라이언트 정보 체크
     codef = EasyCodef::Codef.new()
     param = create_param_for_create_connected_id()
-    res = codef.request_api(
+    res = codef.request_product(
       EasyCodef::PATH_CREATE_ACCOUNT,
       EasyCodef::TYPE_PRODUCT,
       param
@@ -63,7 +134,7 @@ class EasyCodefTest < Minitest::Test
     param_2way = {
       'is2Way'=>true
     }
-    res = codef.request_api(
+    res = codef.request_product(
       EasyCodef::PATH_CREATE_ACCOUNT,
       EasyCodef::TYPE_SANDBOX,
       param_2way
@@ -72,7 +143,7 @@ class EasyCodefTest < Minitest::Test
     assert res['result']['code'] == Message::INVALID_2WAY_KEYWORD.code
 
     # 결과 테스트
-    res = codef.request_api(
+    res = codef.request_product(
       EasyCodef::PATH_CREATE_ACCOUNT,
       EasyCodef::TYPE_SANDBOX,
       param
@@ -81,18 +152,31 @@ class EasyCodefTest < Minitest::Test
     assert res['data']['connectedId'] != nil
   end
 
-  # 2way 키워드 체크 테스트
-  def test_check_two_way_keyword()
-    param = {}
-    flage = check_two_way_keyword(param)
-    assert flage == true
-
+  # certification 요청 테스트
+  def test_request_certification()
+    codef = EasyCodef::Codef.new()
+    param = create_param_for_create_connected_id()
     param['is2Way'] = true
-    flage = check_two_way_keyword(param)
-    assert flage == false
+    param['twoWayInfo'] = nil
 
-    param['twoWayInfo'] = {}
-    flage = check_two_way_keyword(param)
-    assert flage == false
+    res = codef.request_certification(
+      EasyCodef::PATH_CREATE_ACCOUNT,
+      EasyCodef::TYPE_SANDBOX,
+      param
+    )
+    res = JSON.parse(res)
+    assert res['result']['code'] == Message::INVALID_2WAY_INFO.code
+  end
+
+  # 토큰 요청 테스트
+  def test_request_token()
+    codef = EasyCodef::Codef.new()
+    res = codef.request_token(EasyCodef::TYPE_SANDBOX)
+    assert res['access_token'] != nil
+
+    # 클라이언트 정보가 없을 경우 nil
+    res = codef.request_token(EasyCodef::TYPE_PRODUCT)
+    assert res == nil
+
   end
 end

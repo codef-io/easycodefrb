@@ -92,11 +92,11 @@ module EasyCodef
     end
 
     # API 요청
-    def request_api(product_path, service_type, param)
+    def request_product(product_path, service_type, param)
       valid_flag = true
 
-      valid_flag = check_client_info(service_type)
       # 클라이언트 정보 검사
+      valid_flag = check_client_info(service_type)
       if !valid_flag
         res = new_response_message(Message::EMPTY_CLIENT_INFO)
         return res.to_json()
@@ -113,8 +113,52 @@ module EasyCodef
       req_info = get_req_info_by_service_type(service_type)
 
       # 요청
-      res = execute(product_path, param, self, req_info)
+      res = Connector.execute(product_path, param, self, req_info)
       return res.to_json()
+    end
+
+    # 상품 추가인증 요청
+    def request_certification(product_path, service_type, param)
+      valid_flag = true
+
+      # 클라이언트 정보 검사
+      valid_flag = check_client_info(service_type)
+      if !valid_flag
+        res = new_response_message(Message::EMPTY_CLIENT_INFO)
+        return res.to_json()
+      end
+
+      # 추가인증 파라미터 필수 입력 체크
+      valid_flag = check_two_way_info(param)
+      if !valid_flag
+        res = new_response_message(Message::INVALID_2WAY_INFO)
+        return res.to_json()
+      end
+      
+      # 리퀘스트 정보 조회
+      req_info = get_req_info_by_service_type(service_type)
+
+      # 요청
+      res = Connector.execute(product_path, param, self, req_info)
+      return res.to_json()
+    end
+
+    # 토큰 요청
+    def request_token(service_type)
+      exist_client_info = check_client_info(service_type)
+      # @TODO: 토큰요청 시 클라이언트 정보 검사처리 논의
+      if !exist_client_info
+        return nil
+      end
+
+      return case service_type
+      when TYPE_PRODUCT
+        Connector.request_token(CLIENT_ID, CLIENT_SECRET)
+      when TYPE_DEMO
+        Connector.request_token(DEMO_CLIENT_ID, DEMO_CLIENT_SECRET)
+      else 
+        Connector.request_token(SANDBOX_CLIENT_ID, SANDBOX_CLIENT_SECRET)
+      end
     end
 
     private
@@ -130,10 +174,34 @@ module EasyCodef
         SANDBOX_CLIENT_ID.strip != '' && SANDBOX_CLIENT_SECRET.strip != ''
       end
     end
+
   end
 end
 
 # 2Way 키워드 존재 여부 검사
 def check_two_way_keyword(param)
   return param['is2Way'] == nil && param['twoWayInfo'] == nil
+end
+
+# 2Way 필수 데이터 검사
+def check_two_way_info(param)
+  is2_way = param['is2Way']
+  if is2_way == nil || !!is2_way != is2_way || !is2_way
+    return false
+  end
+
+  two_way_info = param['twoWayInfo']
+  if two_way_info == nil
+    return false
+  end
+
+  return check_need_value_in_two_way_info(two_way_info)
+end
+
+# twoWayInfo 내부에 필요한 데이터가 존재하는지 검사
+def check_need_value_in_two_way_info(two_way_info)
+  return two_way_info['jobIndex'] != nil &&
+    two_way_info['threadIndex'] != nil &&
+    two_way_info['jti'] != nil &&
+    two_way_info['twoWayTimestamp'] != nil
 end
