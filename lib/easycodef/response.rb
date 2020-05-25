@@ -16,10 +16,12 @@ module EasyCodef
 end
 
 def new_response_message(message_info)
-  result = {
-    'code'=>message_info.code,
-    'message'=>message_info.message,
-    'extra_message'=>message_info.extra_message,
+  return {
+    'result'=>{
+      'code'=>message_info.code,
+      'message'=>message_info.message,
+      'extra_message'=>message_info.extra_message,
+    },
+    'data'=>{}
   }
-  return EasyCodef::Response.new(result)
 end
