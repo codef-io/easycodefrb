@@ -161,6 +161,36 @@ module EasyCodef
       end
     end
 
+    # connectedID 발급을 위한 계정 등록
+    def create_account(service_type, param)
+      return request_product(PATH_CREATE_ACCOUNT, service_type, param)
+    end
+
+    # 계정 정보 추가
+    def add_account(service_type, param)
+      return request_product(PATH_ADD_ACCOUNT, service_type, param)
+    end
+
+    # 계정 정보 수정
+    def update_account(service_type, param)
+      return request_product(PATH_UPDATE_ACCOUNT, service_type, param)
+    end
+
+    # 계정 정보 삭제
+    def delete_account(service_type, param)
+      return request_product(PATH_DELETE_ACCOUNT, service_type, param)
+    end
+
+    # connectedID로 등록된 계정 목록 조회
+    def get_account_list(service_type, param)
+      return request_product(PATH_GET_ACCOUNT_LIST, service_type, param)
+    end
+
+    # 클라이언트 정보로 등록된 모든 connectedID 목록 조회
+    def get_connected_id_list(service_type, param)
+      return request_product(PATH_GET_CID_LIST, service_type, param)
+    end
+
     private
 
     # 클라이언트 정보 검사
