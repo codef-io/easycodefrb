@@ -1,20 +1,5 @@
-module EasyCodef
-  class Response
-    def initialize(result, data={})
-      @result = result
-      @data = data
-    end
-
-    def result()
-      return @result
-    end
-
-    def data()
-      return @data
-    end
-  end
-end
-
+# 메시지 정보로 결과 생성
+# MessageInfo 인스턴스를 받아서 메시지 정보로 해시를 만든다
 def new_response_message(message_info)
   return {
     'result'=>{

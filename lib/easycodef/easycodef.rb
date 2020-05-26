@@ -2,6 +2,9 @@ require_relative './message'
 require_relative './connector'
 
 module EasyCodef
+  # API 요청에 필요한 정보 클래스
+  # Codef 인스턴스에서 API 요청을 보낼때 서비스 타입별 필요한 정보를 가져와서 사용한다
+  # 이때 정보를 저장하는 역할을 한다
   class RequestInfo
     def initialize(domain, client_id, client_secret)
       @domain = domain
@@ -22,6 +25,9 @@ module EasyCodef
     end
   end
 
+  # Codef 클래스
+  # 요청에 필요한 설정 값들을 가지고 있으며
+  # 유저의 요청 파라미터에 따라 실제 API를 요청하는 역할을 한다
   class Codef
     def initialize()
       @access_token = ''
