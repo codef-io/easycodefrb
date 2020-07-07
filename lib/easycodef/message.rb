@@ -1,3 +1,4 @@
+# 메시지 정보 클래스
 class MessageInfo
   def initialize(code, message, extra_message='')
     @code = code
@@ -18,6 +19,7 @@ class MessageInfo
   end
 end
 
+# 결과 메시지
 module Message
   OK = MessageInfo.new("CF-00000", "성공")
   INVALID_JSON = MessageInfo.new("CF-00002", "json형식이 올바르지 않습니다.")
