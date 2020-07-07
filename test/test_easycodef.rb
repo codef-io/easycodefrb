@@ -28,52 +28,52 @@ class EasyCodefTest < Minitest::Test
   end
 
   # 클라이언트 정보 셋팅 검사 테스트
-  def test_check_client_info()
+  def test_has_client_info()
     codef = EasyCodef::Codef.new()
 
-    flag = codef.send(:check_client_info, EasyCodef::TYPE_SANDBOX)
+    flag = codef.send(:has_client_info, EasyCodef::TYPE_SANDBOX)
     assert flag == true
-    flag = codef.send(:check_client_info, EasyCodef::TYPE_PRODUCT)
+    flag = codef.send(:has_client_info, EasyCodef::TYPE_PRODUCT)
     assert flag == false
-    flag = codef.send(:check_client_info, EasyCodef::TYPE_DEMO)
+    flag = codef.send(:has_client_info, EasyCodef::TYPE_DEMO)
     assert flag == false
 
     codef.set_client_info('real', 'secret')
     codef.set_client_info_for_demo('demo', 'demo_secret')
-    flag = codef.send(:check_client_info, EasyCodef::TYPE_PRODUCT)
+    flag = codef.send(:has_client_info, EasyCodef::TYPE_PRODUCT)
     assert flag == true
-    flag = codef.send(:check_client_info, EasyCodef::TYPE_DEMO)
+    flag = codef.send(:has_client_info, EasyCodef::TYPE_DEMO)
     assert flag == true
   end
 
   # 2way 키워드 체크 테스트
-  def test_check_two_way_keyword()
+  def test_is_empty_two_way_keyword()
     param = {}
-    flag = check_two_way_keyword(param)
+    flag = is_empty_two_way_keyword(param)
     assert flag == true
 
     param['is2Way'] = true
-    flag = check_two_way_keyword(param)
+    flag = is_empty_two_way_keyword(param)
     assert flag == false
 
     param['twoWayInfo'] = {}
-    flag = check_two_way_keyword(param)
+    flag = is_empty_two_way_keyword(param)
     assert flag == false
   end
 
   # 2Way 필수 데이터 체크 테스트
-  def test_check_two_way_info()
+  def test_has_require_two_way_info()
     # is2Way 실패 케이스
     param = {}
-    flag = check_two_way_info(param)
+    flag = has_require_two_way_info(param)
     assert flag == false
 
     param = { 'is2Way'=>'hi' }
-    flag = check_two_way_info(param)
+    flag = has_require_two_way_info(param)
     assert flag == false
 
     param = { 'is2Way'=>false }
-    flag = check_two_way_info(param)
+    flag = has_require_two_way_info(param)
     assert flag == false
 
     # twoWayInfo 실패케이스
@@ -81,7 +81,7 @@ class EasyCodefTest < Minitest::Test
       'is2Way'=>true,
       'twoWayInfo'=>nil
     }
-    flag = check_two_way_info(param)
+    flag = has_require_two_way_info(param)
     assert flag == false
 
     # 성공 케이스
@@ -91,7 +91,7 @@ class EasyCodefTest < Minitest::Test
       'jti'=>'1',
       'twoWayTimestamp'=>'1'
     }
-    flag = check_two_way_info(param)
+    flag = has_require_two_way_info(param)
     assert flag == true
 
   end

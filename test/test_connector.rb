@@ -41,18 +41,29 @@ class ConnectorTest < Minitest::Test
 
   # 토큰 요청 테스트
   def test_request_token()
-    m = Connector.request_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET)
+    m = Connector.request_token(
+      EasyCodef::SANDBOX_CLIENT_ID,
+      EasyCodef::SANDBOX_CLIENT_SECRET
+    )
     assert m != nil
-    assert '' != m[EasyCodef::KEY_ACCESS_TOKEN] && nil != m[EasyCodef::KEY_ACCESS_TOKEN]
-    assert m[EasyCodef::KEY_ACCESS_TOKEN].instance_of? String
+    token = m[EasyCodef::KEY_ACCESS_TOKEN]
+    assert '' != token && nil != token
+    assert token.instance_of? String
   end
 
   # 토큰 셋팅
   def test_set_token()
     codef = EasyCodef::Codef.new()
-    Connector.set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
+    service_type = EasyCodef::TYPE_SANDBOX
+    Connector.set_token(
+      EasyCodef::SANDBOX_CLIENT_ID,
+      EasyCodef::SANDBOX_CLIENT_SECRET,
+      codef.access_token,
+      service_type
+    )
     
-    assert codef.access_token != nil && codef.access_token != ''
+    token = codef.access_token.get_token(service_type)
+    assert token != nil && token != ''
   end
 
   # request_product 메소드 테스트
@@ -60,17 +71,31 @@ class ConnectorTest < Minitest::Test
     data = create_param_for_create_connected_id().to_json()
 
     access_token = ''
-    res = Connector.request_product(EasyCodef::SANDBOX_DOMAIN + '/failPath', access_token, data)
+    res = Connector.request_product(
+      EasyCodef::SANDBOX_DOMAIN + '/failPath',
+      access_token,
+      data
+    )
     assert_equal(Message::NOT_FOUND.code, res['result']['code'])
 
+    service_type = EasyCodef::TYPE_SANDBOX
     # 정상 프로세스
     codef = EasyCodef::Codef.new()
-    Connector.set_token(EasyCodef::SANDBOX_CLIENT_ID, EasyCodef::SANDBOX_CLIENT_SECRET, codef)
-    res = Connector.request_product(EasyCodef::SANDBOX_DOMAIN + EasyCodef::PATH_CREATE_ACCOUNT, codef.access_token, data)
+    Connector.set_token(
+      EasyCodef::SANDBOX_CLIENT_ID,
+      EasyCodef::SANDBOX_CLIENT_SECRET,
+      codef.access_token,
+      service_type
+    )
+    res = Connector.request_product(
+      EasyCodef::SANDBOX_DOMAIN + EasyCodef::PATH_CREATE_ACCOUNT,
+      codef.access_token.get_token(service_type),
+      data
+    )
 
     assert res != nil
-    # result = JSON.parse(res)
-    assert res['data']['connectedId'] != nil && res['data']['connectedId'] != ''
+    cid = res['data']['connectedId']
+    assert cid != nil && cid != ''
   end
 
   # execute 테스트
@@ -79,7 +104,13 @@ class ConnectorTest < Minitest::Test
 
     body = create_param_for_create_connected_id()
     req_info = codef.get_req_info_by_service_type(EasyCodef::TYPE_SANDBOX)
-    res = Connector.execute(EasyCodef::PATH_CREATE_ACCOUNT, body, codef, req_info)
+    res = Connector.execute(
+      EasyCodef::PATH_CREATE_ACCOUNT,
+      body,
+      codef.access_token,
+      req_info,
+      EasyCodef::TYPE_SANDBOX
+    )
     assert res != nil
     assert res['data']['connectedId'] != nil
   end

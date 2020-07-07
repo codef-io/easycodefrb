@@ -2,6 +2,37 @@ require_relative './message'
 require_relative './connector'
 
 module EasyCodef
+  # AccessToken 정보
+  class AccessToken
+    def initialize()
+      @product = ''
+      @demo = ''
+      @sandbox = ''
+    end
+
+    def set_token(token, service_type)
+      case service_type
+      when TYPE_PRODUCT
+        @product = token
+      when TYPE_DEMO
+        @demo = token
+      else
+        @sandbox = token
+      end
+    end
+
+    def get_token(service_type)
+      return case service_type
+      when TYPE_PRODUCT
+        @product
+      when TYPE_DEMO
+        @demo
+      else
+        @sandbox
+      end
+    end
+  end
+
   class RequestInfo
     def initialize(domain, client_id, client_secret)
       @domain = domain
@@ -24,7 +55,7 @@ module EasyCodef
 
   class Codef
     def initialize()
-      @access_token = ''
+      @access_token = AccessToken.new()
       @demo_client_id = ''
       @demo_client_secret = ''
       @client_id = ''
@@ -43,14 +74,6 @@ module EasyCodef
       @demo_client_secret = secret
     end
 
-    def access_token
-      return @access_token
-    end
-
-    def access_token=(access_token)
-      @access_token = access_token
-    end
-
     def demo_client_id
       return @demo_client_id
     end
@@ -65,6 +88,10 @@ module EasyCodef
 
     def client_secret
       return @client_secret
+    end
+
+    def access_token
+      return @access_token
     end
 
     # 서비스 타입에 해당하는 요청 정보 객체 가져오기
@@ -93,18 +120,15 @@ module EasyCodef
 
     # API 요청
     def request_product(product_path, service_type, param)
-      valid_flag = true
 
       # 클라이언트 정보 검사
-      valid_flag = check_client_info(service_type)
-      if !valid_flag
+      if !has_client_info(service_type)
         res = new_response_message(Message::EMPTY_CLIENT_INFO)
         return res.to_json()
       end
 
-      # 추가인증 키워드 체크
-      valid_flag = check_two_way_keyword(param)
-      if !valid_flag
+      # 추가인증 키워드 비어있는지 체크
+      if !is_empty_two_way_keyword(param)
         res = new_response_message(Message::INVALID_2WAY_KEYWORD)
         return res.to_json()
       end
@@ -113,24 +137,26 @@ module EasyCodef
       req_info = get_req_info_by_service_type(service_type)
 
       # 요청
-      res = Connector.execute(product_path, param, self, req_info)
+      res = Connector.execute(
+        product_path,
+        param,
+        @access_token,
+        req_info,
+        service_type
+      )
       return res.to_json()
     end
 
     # 상품 추가인증 요청
     def request_certification(product_path, service_type, param)
-      valid_flag = true
-
       # 클라이언트 정보 검사
-      valid_flag = check_client_info(service_type)
-      if !valid_flag
+      if !has_client_info(service_type)
         res = new_response_message(Message::EMPTY_CLIENT_INFO)
         return res.to_json()
       end
 
       # 추가인증 파라미터 필수 입력 체크
-      valid_flag = check_two_way_info(param)
-      if !valid_flag
+      if !has_require_two_way_info(param)
         res = new_response_message(Message::INVALID_2WAY_INFO)
         return res.to_json()
       end
@@ -139,15 +165,19 @@ module EasyCodef
       req_info = get_req_info_by_service_type(service_type)
 
       # 요청
-      res = Connector.execute(product_path, param, self, req_info)
+      res = Connector.execute(
+        product_path,
+        param,
+        @access_token,
+        req_info,
+        service_type
+      )
       return res.to_json()
     end
 
     # 토큰 요청
     def request_token(service_type)
-      exist_client_info = check_client_info(service_type)
-      # @TODO: 토큰요청 시 클라이언트 정보 검사처리 논의
-      if !exist_client_info
+      if !has_client_info(service_type)
         return nil
       end
 
@@ -194,7 +224,7 @@ module EasyCodef
     private
 
     # 클라이언트 정보 검사
-    def check_client_info(service_type)
+    def has_client_info(service_type)
       return case service_type
       when TYPE_PRODUCT
         @client_id.strip != '' && client_secret.strip != ''
@@ -204,17 +234,16 @@ module EasyCodef
         SANDBOX_CLIENT_ID.strip != '' && SANDBOX_CLIENT_SECRET.strip != ''
       end
     end
-
   end
 end
 
 # 2Way 키워드 존재 여부 검사
-def check_two_way_keyword(param)
+def is_empty_two_way_keyword(param)
   return param['is2Way'] == nil && param['twoWayInfo'] == nil
 end
 
 # 2Way 필수 데이터 검사
-def check_two_way_info(param)
+def has_require_two_way_info(param)
   is2_way = param['is2Way']
   if is2_way == nil || !!is2_way != is2_way || !is2_way
     return false
