@@ -1,5 +1,5 @@
 require 'minitest/autorun'
-require 'easycodef'
+require 'easycodefrb'
 
 class EasyCodefTest < Minitest::Test
   def test_encode_to_file_str()

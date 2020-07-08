@@ -1,8 +1,8 @@
 require 'json'
 require 'minitest/autorun'
-require 'easycodef/connector'
-require 'easycodef/util'
-require 'easycodef/message'
+require 'easycodefrb/connector'
+require 'easycodefrb/util'
+require 'easycodefrb/message'
 
 def create_param_for_create_connected_id()
 	publicKey = "MIIBIjANBgkqhkiG9w0BAQ" +

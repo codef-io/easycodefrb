@@ -1,7 +1,7 @@
 require 'minitest/autorun'
 require 'json'
-require 'easycodef'
-require 'easycodef/message'
+require 'easycodefrb'
+require 'easycodefrb/message'
 require_relative './test_connector'
 
 class EasyCodefTest < Minitest::Test
@@ -120,7 +120,7 @@ class EasyCodefTest < Minitest::Test
   # request_product 테스트
   def test_request_product()
     # 클라이언트 정보 체크
-    codef = EasyCodef::Codef.new()
+    codef = EasyCodef::Codef.new('public_key')
     param = create_param_for_create_connected_id()
     res = codef.request_product(
       EasyCodef::PATH_CREATE_ACCOUNT,
@@ -154,7 +154,7 @@ class EasyCodefTest < Minitest::Test
 
   # certification 요청 테스트
   def test_request_certification()
-    codef = EasyCodef::Codef.new()
+    codef = EasyCodef::Codef.new('public_key')
     param = create_param_for_create_connected_id()
     param['is2Way'] = true
     param['twoWayInfo'] = nil
@@ -178,5 +178,13 @@ class EasyCodefTest < Minitest::Test
     res = codef.request_token(EasyCodef::TYPE_PRODUCT)
     assert res == nil
 
+  end
+
+  # 퍼블릭키 에러 테스트
+  def test_empty_public_key()
+    codef = EasyCodef::Codef.new()
+    res = codef.request_product('path', EasyCodef::TYPE_PRODUCT, {})
+    j_res = JSON.parse(res)
+    assert j_res['result']['code'] == 'CF-00014'
   end
 end

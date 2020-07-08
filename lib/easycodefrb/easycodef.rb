@@ -60,12 +60,13 @@ module EasyCodef
   # 요청에 필요한 설정 값들을 가지고 있으며
   # 유저의 요청 파라미터에 따라 실제 API를 요청하는 역할을 한다
   class Codef
-    def initialize()
+    def initialize(public_key='')
       @access_token = AccessToken.new()
       @demo_client_id = ''
       @demo_client_secret = ''
       @client_id = ''
       @client_secret = ''
+      @public_key = public_key
     end
     
     # 정식버전 클라이언트 정보 셋팅
@@ -98,6 +99,14 @@ module EasyCodef
 
     def access_token
       return @access_token
+    end
+
+    def public_key
+      return @public_key
+    end
+
+    def public_key(public_key)
+      @public_key = public_key
     end
 
     # 서비스 타입에 해당하는 요청 정보 객체 가져오기
@@ -133,6 +142,12 @@ module EasyCodef
         return res.to_json()
       end
 
+      # 퍼블릭키 검사
+      if @public_key == ''
+        res = new_response_message(Message::EMPTY_PUBLIC_KEY)
+        return res.to_json()
+      end
+
       # 추가인증 키워드 비어있는지 체크
       if !is_empty_two_way_keyword(param)
         res = new_response_message(Message::INVALID_2WAY_KEYWORD)
@@ -158,6 +173,12 @@ module EasyCodef
       # 클라이언트 정보 검사
       if !has_client_info(service_type)
         res = new_response_message(Message::EMPTY_CLIENT_INFO)
+        return res.to_json()
+      end
+
+      # 퍼블릭키 검사
+      if @public_key == ''
+        res = new_response_message(Message::EMPTY_PUBLIC_KEY)
         return res.to_json()
       end
 
