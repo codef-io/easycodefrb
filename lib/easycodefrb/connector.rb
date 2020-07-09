@@ -1,5 +1,6 @@
 require 'net/http'
 require 'uri'
+require 'cgi'
 require 'json'
 require 'base64'
 
@@ -30,7 +31,7 @@ module Connector
 
     return case res
     when Net::HTTPOK
-      data = URI.decode(res.body)
+      data = CGI::unescape(res.body)
       return JSON.parse(data)
     when Net::HTTPBadRequest
       new_response_message(Message::BAD_REQUEST)
@@ -102,7 +103,7 @@ module Connector
       access_token_cls,
       service_type
     )
-    enc_body = URI.decode(body.to_json())
+    enc_body = CGI::escape(body.to_json())
     return request_product(
       req_info.domain + url_path,
       access_token_cls.get_token(service_type),

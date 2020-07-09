@@ -18,7 +18,7 @@ module EasyCodef
   def encrypt_RSA(text, public_key)
     pub = Base64.decode64(public_key)
     key = OpenSSL::PKey::RSA.new(pub)
-    enc_str = key.public_encrypt(text, OpenSSL::PKey::RSA::PKCS1_OAEP_PADDING)
+    enc_str = key.public_encrypt(text)
     return Base64.encode64(enc_str).gsub(/\n/, '')
   end
 end

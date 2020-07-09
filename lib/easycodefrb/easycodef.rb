@@ -101,13 +101,11 @@ module EasyCodef
       return @access_token
     end
 
-    def public_key
+    def public_key (public_key=nil)
+      @public_key = public_key if public_key
       return @public_key
     end
 
-    def public_key(public_key)
-      @public_key = public_key
-    end
 
     # 서비스 타입에 해당하는 요청 정보 객체 가져오기
     def get_req_info_by_service_type(service_type)
@@ -210,9 +208,9 @@ module EasyCodef
 
       return case service_type
       when TYPE_PRODUCT
-        Connector.request_token(CLIENT_ID, CLIENT_SECRET)
+        Connector.request_token(@client_id, @client_secret)
       when TYPE_DEMO
-        Connector.request_token(DEMO_CLIENT_ID, DEMO_CLIENT_SECRET)
+        Connector.request_token(@demo_client_id, @demo_client_secret)
       else 
         Connector.request_token(SANDBOX_CLIENT_ID, SANDBOX_CLIENT_SECRET)
       end
@@ -266,13 +264,19 @@ end
 
 # 2Way 키워드 존재 여부 검사
 def is_empty_two_way_keyword(param)
+  if param == nil
+    return true
+  end
   return param['is2Way'] == nil && param['twoWayInfo'] == nil
 end
 
 # 2Way 필수 데이터 검사
 def has_require_two_way_info(param)
+  if param == nil
+    return false
+  end
   is2_way = param['is2Way']
-  if is2_way == nil || !!is2_way != is2_way || !is2_way
+  if !!is2_way != is2_way || !is2_way
     return false
   end
 
