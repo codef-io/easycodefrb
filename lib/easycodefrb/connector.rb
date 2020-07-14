@@ -88,8 +88,6 @@ module Connector
             break
           end
         end
-
-        sleep(0.020)
         i += 1
       end
     end
