@@ -176,7 +176,7 @@ codef.set_client_info(client_id, client_secret)
 # - 각 상품별 파라미터를 설정(https://developer.codef.io/products))
 parameter = {
   'connectedId' => '8PQI4dQ......hKLhTnZ',
-  'organization': '0004',
+  'organization' => '0004',
 }
 
 # 은행 보유계좌 조회 요청 테스트 (https://developer.codef.io/products/bank/common/p/account)
